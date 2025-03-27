@@ -1,0 +1,83 @@
+﻿@page "/"
+@using Jargoon.Data.IHO
+@using Jargoon.Data.S57
+@attribute [StreamRendering]
+@inject HttpService HttpService
+
+<PageTitle>Unique Features</PageTitle>
+
+<h1>Unique Features</h1>
+
+<p>This component demonstrates showing unique features within a particular ENC.</p>
+
+<p role="status">Definition: @definition</p>
+
+@if (features == null)
+{
+    <p>
+        <em>Loading...</em>
+    </p>
+}
+else
+{
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Feature Name</th>
+            <th>Unique Count</th>
+            <th>Definition</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var feature in features)
+        {
+            <tr>
+                <td>@feature.Item1</td>
+                <td>@feature.Item2</td>
+                <td><button class="btn btn-primary" @onclick="() => DoSomething(feature.Item1.ToString())">Click</button></td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<(GeoObjectLabel, int)> features;
+    private string definition;
+
+    protected override Task OnInitializedAsync()
+    {
+        ParseFeatures();
+
+        return Task.CompletedTask;
+    }
+    
+    private void ParseFeatures()
+    {
+        var decryptedFileLocation = new FileInfo("resources\\GB40623A.000");
+
+        var stream = File.OpenRead(decryptedFileLocation.FullName);
+
+        var decoder = new S57Decoder();
+
+        stream.Seek(0, SeekOrigin.Begin);
+        decoder.Decode(stream);
+
+        var iho = new IHOENCDataModel();
+
+        iho.CreateModel(decoder.S57DataSet);
+        
+        features = iho.Features
+            .GroupBy(feature => feature.GeoObjectLabel)
+            .Select(group => (GeoObjectLabel: group.Key, Count: group.Count()))
+            .OrderBy(feature => feature.GeoObjectLabel)
+            .ToList();
+    }
+
+    private async Task DoSomething(string name)
+    {
+        var tempdefinition = await HttpService.GetDefinitionDataAsync(name);
+        
+        definition = $"{name} : {tempdefinition}";
+    }
+}

@@ -7,11 +7,11 @@ public class Entrypoint(IEncDecryptorWrapper encDecryptor) : IEntrypoint
 {
     public Task RunAsync(string[] args)
     {
-        var currentDirectory = "D:\\\\other\\\\EncDecryptTool\\\\resources\\";
+        var currentDirectory = "D:\\other\\Hackathon2025ENC\\EncDecryptTool\\resources";
         // var encFileLocation = new FileInfo(Path.Combine(currentDirectory, args[0]));
         // var encryptionKey = args[1];
         
-        var encFileLocation = new FileInfo("D:\\other\\EncDecryptTool\\resources\\GB40623A.000");
+        var encFileLocation = new FileInfo("D:\\other\\Hackathon2025ENC\\EncDecryptTool\\resources\\GB40623A.000");
         var encryptionKey = "79FBAEE9FA";
         
         var unencryptedEncFromFileLocation = encDecryptor.DecryptFile(encFileLocation, encryptionKey);
@@ -34,6 +34,10 @@ public class Entrypoint(IEncDecryptorWrapper encDecryptor) : IEntrypoint
         var iho = new IHOENCDataModel();
         
         iho.CreateModel(decoder.S57DataSet);
+
+        var features = iho.FeatureLookup
+            .Select(feature => feature.Key)
+            .ToList();
         
         //----------
         
