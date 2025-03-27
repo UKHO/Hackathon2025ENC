@@ -1,5 +1,10 @@
 ﻿using Jargoon.Data.IHO;
 using Jargoon.Data.S57;
+using Jargoon.Data.ENC.SQLDB;
+using System.ComponentModel.DataAnnotations;
+using System.Reflection;
+using System.Collections.Generic;
+using ENSwissKnife;
 
 // read the decrypted ENC
 //var ENCFileAsString = File.ReadAllText("Decrypted_GB40623A.000");
@@ -22,6 +27,13 @@ var s57DataSetGeneralInformationRecord = s57ENCDataSet.DataSetGeneralInformation
 // TODO - explore how to list data
 IHOENCDataModel iHOENCDataModel = new IHOENCDataModel();
 iHOENCDataModel.CreateModel(s57ENCDataSet);
+
+var featureLookup = iHOENCDataModel.FeatureLookup;
+var features = iHOENCDataModel.Features;
+var spatialDictionary = iHOENCDataModel.SpatialDictionary;
+var spatials = iHOENCDataModel.Spatials;
+
+var z = features.Select(x => x.GeoObjectLabel.ToName()).ToList();
 
 
 Console.ReadLine();
